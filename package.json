@@ -1,6 +1,6 @@
 {
   "name": "@oncojs/boxplot",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "boxplot React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -22,17 +22,19 @@
   "peerDependencies": {
     "react": "16.x"
   },
-  "devDependencies": {
-    "babel-plugin-transform-react-remove-prop-types": "0.4.24",
+  "dependencies": {
     "d3-axis": "1.0.12",
     "d3-scale": "3.0.0",
     "d3-selection": "1.4.0",
+    "react-resize-detector": "4.1.3",
+    "styled-components": "4.2.0"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "nwb": "0.23.x",
     "prop-types": "15.7.2",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-resize-detector": "4.1.3",
-    "styled-components": "4.2.0"
+    "react-dom": "^16.8.6"
   },
   "author": "",
   "homepage": "",
