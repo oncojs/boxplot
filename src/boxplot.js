@@ -25,7 +25,7 @@ export function boxplot({
   let symbol = boxplotSymbolTick;
   let opacity = 1;
   let vertical = false;
-  const verticalPadding = 50;
+  const verticalPadding = axisTitle ? 50 : 30;
 
   const boxplotBuilder = ctx => {
     const inversed = scale.range()[0] > scale.range()[1];
@@ -88,42 +88,43 @@ export function boxplot({
         nodeName: 'line',
         update(context) {
           context
-            .attr('opacity', d => (['Minimum', 'Maximum'].includes(d.datum) ? 0 : opacity))
+            .attr('opacity', opacity)
+            // .attr('opacity', d => (['Minimum', 'Maximum'].includes(d.datum) ? 0 : opacity))
             .attr(`${x}1`, d => scale(d.value))
             .attr(`${x}2`, d => scale(d.value))
-            .attr(`${y}1`, Math.min(-2, boxwidth * -0.5))
-            .attr(`${y}2`, Math.max(2, boxwidth * 0.5));
+            .attr(`${y}1`, d => Math.min(-2, -boxwidth * (['Minimum', 'Maximum'].includes(d.datum) ? 0.25 : 0.60)))
+            .attr(`${y}2`, d => Math.max(2, boxwidth * (['Minimum', 'Maximum'].includes(d.datum) ? 0.25 : 0.60)));
         },
       },
     };
 
     const renderer = renderers[symbol];
 
-    let gDecadeBar = selection.select('g.decadeBar');// .data([0]);
+    let gDecadeBar = selection.select('g.decadeBar');
 
-    // console.log('testing', selection, gDecadeBar.enter().append('g'));
     if (gDecadeBar.empty()) {
       gDecadeBar = selection.append('g')
-      // gDecadeBar.enter().append('g')
         .attr('class', 'decadeBar')
         .attr('color', '#ccc')
-        .attr('transform', `translate(${coor(0, vertical ? verticalPadding : bandwidth)})`);
+        .attr('transform', `translate(${
+          coor(0, (vertical ? verticalPadding : bandwidth))
+        })`);
       gDecadeBar.exit().remove();
     }
 
     const decadeBar = gDecadeBar
       .call(
         (vertical
-          ? axisLeft(scale)
-          : axisBottom(scale)
-        )
+          ? axisLeft
+          : axisBottom
+        )(scale)
           .tickSize(-bandwidth)
           .tickSizeOuter(-10)
       );
 
     axisTitle && decadeBar.append('text')
       .attr('class', 'axisTitle')
-      .attr('fill', 'currentColor')
+      .attr('fill', '#333')
       .attr('font-size', '1rem')
       .attr('transform', `translate(${
         coor(scale(50), vertical ? -(verticalPadding / 2) : 30)
@@ -163,7 +164,8 @@ export function boxplot({
       .data(d => d.whiskers)
       .enter().append('path')
       .attr('fill', 'none')
-      .attr('stroke', 'currentColor')
+      .attr('stroke', '#333')
+      .attr('stroke-dasharray', '6 6')
       .attr('stroke-width', 2)
       .attr('d', d => whiskerPath(d));
 
@@ -183,7 +185,7 @@ export function boxplot({
     if (gPoint.empty()) {
       gPoint = selection.append('g')
         .attr('class', 'point')
-        .attr('color', '#fff')
+        .attr('color', '#333')
         .attr('transform', `translate(${coor(
           0,
           (vertical ? verticalPadding : 0) + (bandwidth * 0.5),
@@ -274,13 +276,21 @@ export function boxplot({
 export const boxplotStats = ({
   iqr,
   max,
+  mean,
   median,
   min,
   q1,
   q3,
 }) => {
-  const ceilingCandidate = Math.round(max / 10) * 10;
-  const ceiling = ceilingCandidate > max ? ceilingCandidate : (ceilingCandidate + 10);
+  const buffer = (max - min) / 10;
+  const ceilingCandidate = Math.ceil(max / 10) * 10;
+  const ceiling = ceilingCandidate
+    ? ceilingCandidate > max ? ceilingCandidate : (ceilingCandidate + buffer)
+    : buffer;
+  const floorCandidate = Math.floor(min / 10) * 10;
+  const floor = floorCandidate
+    ? floorCandidate < min ? floorCandidate : (floorCandidate - buffer)
+    : -buffer;
 
   const boxes = [
     {
@@ -341,7 +351,9 @@ export const boxplotStats = ({
 
   return {
     boxes,
+    buffer,
     ceiling,
+    floor,
     iqr,
     points,
     whiskers,
@@ -360,7 +372,7 @@ export const renderBoxPlot = ({
 }) => {
   const stats = boxplotStats(data, vertical);
   const axis1 = scaleLinear()
-    .domain(vertical ? [stats.ceiling, 0] : [0, stats.ceiling])
+    .domain(vertical ? [stats.ceiling, stats.floor] : [stats.floor, stats.ceiling])
     .range([10, vertical ? height - 10 : width - 10]);
   const axis2 = scaleBand()
     .domain([0, 100])
@@ -371,7 +383,7 @@ export const renderBoxPlot = ({
     setTooltip,
   })
     .bandwidth(axis2.bandwidth())
-    .boxwidth(80)
+    .boxwidth(axis2.bandwidth() / 4)
     .key(d => d.key)
     .scale(axis1)
     .vertical(vertical);

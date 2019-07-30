@@ -16,11 +16,15 @@ class BoxPlotWrapper extends React.Component {
 
   componentDidUpdate = ({
     axisTitle,
-    data,
+    data: prevData,
     setTooltip,
   }, {
     isVertical: prevVertical,
   }) => {
+    const {
+      color,
+      data: newData,
+    } = this.props;
     const {
       height,
       isVertical,
@@ -28,34 +32,34 @@ class BoxPlotWrapper extends React.Component {
       width,
     } = this.state;
 
-    if (width && height && (
-      prevVertical !== isVertical
-    )) {
-      renderBoxPlot({
-        axisTitle,
-        container: svgWrapper,
-        data: Object.keys(data).reduce((acc, key) => Object.assign(
-          acc,
-          [
-            'Max',
-            'Median',
-            'Min',
-            'IQR',
-            'q1',
-            'q3',
-          ].includes(key) && { [key.toLowerCase()]: data[key] },
-        ), {}),
-        height,
-        setTooltip,
-        width,
-      });
-    }
-  }
+    ((width && height && (prevVertical === isVertical)) &&
+    (JSON.stringify(prevData) === JSON.stringify(newData))
+    ) || renderBoxPlot({
+      axisTitle,
+      color,
+      container: svgWrapper,
+      data: Object.keys(newData).reduce((acc, key) => Object.assign(
+        acc,
+        [
+          'Max',
+          'Mean'
+          'Median',
+          'Min',
+          'IQR',
+          'q1',
+          'q3',
+        ].includes(key) && { [key.toLowerCase()]: newData[key] },
+      ), {}),
+      height,
+      setTooltip,
+      width,
+    });
+  };
 
   setSvgWrapper = r => {
     const { svgWrapper } = this.state;
     r && !svgWrapper && this.setState({ svgWrapper: r });
-  }
+  };
 
   render = () => (
     // <StyledSvgWrapper
