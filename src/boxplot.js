@@ -87,24 +87,32 @@ export function boxplot({
         },
         nodeName: 'line',
         update(context) {
+          const lineLength = datum => ['Minimum', 'Maximum'].includes(datum) 
+            ? 0.25
+            : ['Mean1', 'Mean2'].includes(datum)
+              ? 0.15
+              : 0.60;
+          const calcY1 = datum => Math.min(-2, -boxwidth * lineLength(datum));
+          const calcY2 = datum => Math.max(2, boxwidth * lineLength(datum));
+
+          const meanYCenter = (calcY2('Mean1') - calcY1('Mean1')) / 2;
+          const mean2X1 = value => value - meanYCenter;
+          const mean2X2 = value => value + meanYCenter;
+
           context
             .attr('opacity', opacity)
             // .attr('opacity', d => (['Minimum', 'Maximum'].includes(d.datum) ? 0 : opacity))
-            .attr(`${x}1`, d => scale(d.value))
-            .attr(`${x}2`, d => scale(d.value))
-            .attr(`${y}1`, d => Math.min(-2, -boxwidth * (['Minimum', 'Maximum'].includes(d.datum) 
-              ? 0.25
-              : ['Mean1', 'Mean2'].includes(d.datum)
-                ? 0.1
-                : 0.60)))
-            .attr(`${y}2`, d => Math.max(2, boxwidth * (['Minimum', 'Maximum'].includes(d.datum) 
-            ? 0.25 
-            : ['Mean1', 'Mean2'].includes(d.datum)
-              ? 0.1 
-              : 0.60)))
-            .attr('transform', d => {
-              console.log('datum', d.datum)
-              return d.datum === 'Mean2' ? 'rotate(90)' : 'rotate(0)'});
+            .attr(`${x}1`, d => d.datum === 'Mean2' 
+              ? mean2X1(scale(d.value))
+              : scale(d.value))
+            .attr(`${x}2`, d => d.datum === 'Mean2' 
+              ? mean2X2(scale(d.value))
+              : scale(d.value))
+            .attr(`${y}1`, d => d.datum === 'Mean2' ? 0 : calcY1(d.datum))
+            .attr(`${y}2`, d => d.datum === 'Mean2' ? 0 : calcY2(d.datum))
+            .attr('color', d => ['Mean1', 'Mean2'].includes(d.datum) 
+              ? '#dfdfdf' 
+              : 'currentColor')
         },
       },
     };
