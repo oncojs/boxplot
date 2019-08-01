@@ -42,7 +42,7 @@ class BoxPlotWrapper extends React.Component {
         acc,
         [
           'Max',
-          'Mean'
+          'Mean',
           'Median',
           'Min',
           'IQR',
