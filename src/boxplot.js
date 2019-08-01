@@ -92,19 +92,18 @@ export function boxplot({
             // .attr('opacity', d => (['Minimum', 'Maximum'].includes(d.datum) ? 0 : opacity))
             .attr(`${x}1`, d => scale(d.value))
             .attr(`${x}2`, d => scale(d.value))
-            .attr(`${y}1`, d => Math.min(-2, -boxwidth * (['Minimum', 'Maximum'].includes(d.datum) 
-              ? 0.25
-              : ['Mean1', 'Mean2'].includes(d.datum)
-                ? 0.1
-                : 0.60)))
-            .attr(`${y}2`, d => Math.max(2, boxwidth * (['Minimum', 'Maximum'].includes(d.datum) 
-            ? 0.25 
-            : ['Mean1', 'Mean2'].includes(d.datum)
-              ? 0.1 
-              : 0.60)))
-            .attr('transform', d => {
-              console.log('datum', d.datum)
-              return d.datum === 'Mean2' ? 'rotate(90)' : 'rotate(0)'});
+              .attr(`${y}1`, d => Math.min(-2, -boxwidth * (
+                ['Minimum', 'Maximum'].includes(d.datum) 
+                  ? 0.25
+                  : ['Mean1', 'Mean2'].includes(d.datum)
+                    ? 0.1
+                    : 0.60)))
+            .attr(`${y}2`, d => Math.max(2, boxwidth * (
+              ['Minimum', 'Maximum'].includes(d.datum) 
+                ? 0.25 
+                : ['Mean1', 'Mean2'].includes(d.datum)
+                  ? 0.1 
+                  : 0.60)));
         },
       },
     };
