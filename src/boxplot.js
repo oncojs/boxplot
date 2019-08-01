@@ -100,15 +100,27 @@ export function boxplot({
 
     const renderer = renderers[symbol];
 
+    const getWidestAxisNum = points => {
+      const min = Math.floor((points.find(p => p.datum === 'Minimum') || { value: 0 }).value);
+      const max = Math.ceil((points.find(p => p.datum === 'Maximum') || { value: 0 }).value);
+      return Math.max(`${min}`.length, `${max}`.length);
+    };
+
+    const getLeftOffset = points => (
+      coor(0, (vertical ? verticalPadding : bandwidth) + (((getWidestAxisNum(points) * 1.5) + bandwidth) * 0.5))
+    );
+
     let gDecadeBar = selection.select('g.decadeBar');
 
     if (gDecadeBar.empty()) {
       gDecadeBar = selection.append('g')
         .attr('class', 'decadeBar')
         .attr('color', '#ccc')
-        .attr('transform', `translate(${
-          coor(0, (vertical ? verticalPadding : bandwidth))
-        })`);
+        .attr('transform', d => (
+          `translate(${
+            coor(0, (vertical ? verticalPadding : bandwidth) + (getWidestAxisNum(d.points) * 1.5))
+          })`
+        ));
       gDecadeBar.exit().remove();
     }
 
@@ -137,10 +149,11 @@ export function boxplot({
     if (gBox.empty()) {
       gBox = selection.append('g')
         .attr('class', 'box')
-        .attr('transform', `translate(${coor(
-          0,
-          (bandwidth * 0.5) + (vertical ? verticalPadding : 0),
-        )})`);
+        .attr('transform', d => (
+          `translate(${
+            getLeftOffset(d.points)
+          })`
+        ));
     }
 
     const whiskerPath = d => (
@@ -154,10 +167,11 @@ export function boxplot({
     if (gWhisker.empty()) {
       gWhisker = selection.append('g')
         .attr('class', 'whisker')
-        .attr('transform', `translate(${coor(
-            0,
-            (vertical ? verticalPadding : 0) + (bandwidth * 0.5),
-          )})`);
+        .attr('transform', d => (
+          `translate(${
+            getLeftOffset(d.points)
+          })`
+        ));
     }
 
     const whisker = gWhisker.selectAll('path')
@@ -186,10 +200,11 @@ export function boxplot({
       gPoint = selection.append('g')
         .attr('class', 'point')
         .attr('color', '#333')
-        .attr('transform', `translate(${coor(
-          0,
-          (vertical ? verticalPadding : 0) + (bandwidth * 0.5),
-        )})`);
+        .attr('transform', d => (
+          `translate(${
+            getLeftOffset(d.points)
+          })`
+        ));
     }
 
     let point = gPoint.selectAll('.point')
