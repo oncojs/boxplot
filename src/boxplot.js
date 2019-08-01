@@ -92,8 +92,19 @@ export function boxplot({
             // .attr('opacity', d => (['Minimum', 'Maximum'].includes(d.datum) ? 0 : opacity))
             .attr(`${x}1`, d => scale(d.value))
             .attr(`${x}2`, d => scale(d.value))
-            .attr(`${y}1`, d => Math.min(-2, -boxwidth * (['Minimum', 'Maximum'].includes(d.datum) ? 0.25 : 0.60)))
-            .attr(`${y}2`, d => Math.max(2, boxwidth * (['Minimum', 'Maximum'].includes(d.datum) ? 0.25 : 0.60)));
+            .attr(`${y}1`, d => Math.min(-2, -boxwidth * (['Minimum', 'Maximum'].includes(d.datum) 
+              ? 0.25
+              : ['Mean1', 'Mean2'].includes(d.datum)
+                ? 0.1
+                : 0.60)))
+            .attr(`${y}2`, d => Math.max(2, boxwidth * (['Minimum', 'Maximum'].includes(d.datum) 
+            ? 0.25 
+            : ['Mean1', 'Mean2'].includes(d.datum)
+              ? 0.1 
+              : 0.60)))
+            .attr('transform', d => {
+              console.log('datum', d.datum)
+              return d.datum === 'Mean2' ? 'rotate(90)' : 'rotate(0)'});
         },
       },
     };
@@ -191,7 +202,6 @@ export function boxplot({
           (vertical ? verticalPadding : 0) + (bandwidth * 0.5),
         )})`);
     }
-
     let point = gPoint.selectAll('.point')
       .data(
         d => (showInnerDots ? d.points : d.points.filter(d2 => d2.outlier)),
@@ -210,7 +220,9 @@ export function boxplot({
       point
         .attr('cursor', 'pointer')
         .on('mouseenter', d => {
-          setTooltip(`${d.datum}: ${d.value}`);
+          setTooltip(`${['Mean1', 'Mean2'].includes(d.datum) 
+          ? 'Mean' 
+          : d.datum}: ${d.value}`);
         })
         .on('mouseleave', () => {
           setTooltip();
@@ -334,7 +346,18 @@ export const boxplotStats = ({
       outlier: false,
       value: max,
     },
-  ];
+  ].concat(typeof mean !== undefined && [{
+    datum: 'Mean1',
+    farout: false,
+    outlier: false,
+    value: mean,
+  },
+  {
+    datum: 'Mean2',
+    farout: false,
+    outlier: false,
+    value: mean,
+  }]);
 
   const whiskers = [
     {
