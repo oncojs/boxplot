@@ -87,11 +87,11 @@ export function boxplot({
         },
         nodeName: 'line',
         update(context) {
-          const lineLength = datum => ['Minimum', 'Maximum'].includes(datum) 
+          const lineLength = datum => (['Minimum', 'Maximum'].includes(datum)
             ? 0.25
             : ['Mean1', 'Mean2'].includes(datum)
               ? 0.15
-              : 0.60;
+              : 0.60);
           const calcY1 = datum => Math.min(-2, -boxwidth * lineLength(datum));
           const calcY2 = datum => Math.max(2, boxwidth * lineLength(datum));
 
@@ -102,17 +102,17 @@ export function boxplot({
           context
             .attr('opacity', opacity)
             // .attr('opacity', d => (['Minimum', 'Maximum'].includes(d.datum) ? 0 : opacity))
-            .attr(`${x}1`, d => d.datum === 'Mean2' 
+            .attr(`${x}1`, d => (d.datum === 'Mean2'
               ? mean2X1(scale(d.value))
-              : scale(d.value))
-            .attr(`${x}2`, d => d.datum === 'Mean2' 
+              : scale(d.value)))
+            .attr(`${x}2`, d => (d.datum === 'Mean2'
               ? mean2X2(scale(d.value))
-              : scale(d.value))
-            .attr(`${y}1`, d => d.datum === 'Mean2' ? 0 : calcY1(d.datum))
-            .attr(`${y}2`, d => d.datum === 'Mean2' ? 0 : calcY2(d.datum))
-            .attr('color', d => ['Mean1', 'Mean2'].includes(d.datum) 
-              ? '#dfdfdf' 
-              : 'currentColor')
+              : scale(d.value)))
+            .attr(`${y}1`, d => (d.datum === 'Mean2' ? 0 : calcY1(d.datum)))
+            .attr(`${y}2`, d => (d.datum === 'Mean2' ? 0 : calcY2(d.datum)))
+            .attr('color', d => (['Mean1', 'Mean2'].includes(d.datum)
+              ? '#dfdfdf'
+              : 'currentColor'));
         },
       },
     };
@@ -243,9 +243,9 @@ export function boxplot({
       point
         .attr('cursor', 'pointer')
         .on('mouseenter', d => {
-          setTooltip(`${['Mean1', 'Mean2'].includes(d.datum) 
-          ? 'Mean' 
-          : d.datum}: ${d.value}`);
+          setTooltip(`${['Mean1', 'Mean2'].includes(d.datum)
+          ? 'Mean'
+          : d.datum}: ${Number(Number(d.value).toFixed(2))}`);
         })
         .on('mouseleave', () => {
           setTooltip();
@@ -369,18 +369,20 @@ export const boxplotStats = ({
       outlier: false,
       value: max,
     },
-  ].concat(typeof mean !== undefined && [{
-    datum: 'Mean1',
-    farout: false,
-    outlier: false,
-    value: mean,
-  },
-  {
-    datum: 'Mean2',
-    farout: false,
-    outlier: false,
-    value: mean,
-  }]);
+  ].concat(typeof mean !== undefined && [
+    {
+      datum: 'Mean1',
+      farout: false,
+      outlier: false,
+      value: mean,
+    },
+    {
+      datum: 'Mean2',
+      farout: false,
+      outlier: false,
+      value: mean,
+    },
+  ]);
 
   const whiskers = [
     {
